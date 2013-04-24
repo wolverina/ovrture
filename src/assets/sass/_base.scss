@@ -1,0 +1,39 @@
+body {
+	font: 24px/1.5em "adelle-sans", 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	background-color: $color-main;
+	color: $color-relief;
+	font-weight: 100;
+	
+	&.dbg {
+		margin: 0 auto;
+		width: 320px;
+		@include box-sizing(border-box);
+		border: 1px solid red;
+	}
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 { 
+	font-size: 1em; 
+	font-weight: normal; 
+	margin: 0;
+}
+
+a { 
+	color: $color-relief;
+	text-decoration: none; 
+	outline: 0;
+}
+
+img,
+object,
+embed { max-width: 100%; }
+
+b,
+strong { font-weight: 400; }
+
+p { line-height: 1.5; }

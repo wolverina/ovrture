@@ -1,0 +1,470 @@
+.l-radio { 
+    background-color: $color-main;
+    padding-top: $unit-v;
+    position: relative;
+    z-index: 99; 
+}
+
+.g-header { 
+    padding: $unit-h $unit-h $unit-h/2 $unit-h;
+    background-color: $color-main;
+    text-align: center;
+    position: relative;
+    z-index: 99;
+}
+
+.g-footer { 
+    padding: $unit-h;
+    text-align: center; 
+}
+
+.b-controls {
+    $font-local: 24px;
+    @include filter-gradient($color-relief, $color-relief, vertical);
+    $experimental-support-for-svg: true;
+    @include background-image(linear-gradient(top, rgba(233,233,233,0) 0%,rgba(233,233,233,1) 38%,rgba(233,233,233,1) 100%));
+    padding: $unit-h 0 $unit-h/2;
+    @include border-radius(0 0 $unit-border-radius $unit-border-radius);
+
+    a {
+        color: $color-main;
+        font-size: calc-em($font-local, $font-size-base);
+        text-shadow: 0 1px #f9f9f9;
+    }
+
+    .a-primary {
+        display: inline;
+        background-color: transparent;
+        font-size: calc-em(28px, $font-local);
+    }
+
+    .icon {
+        width: 12px;
+        height: 14px;
+        display: inline-block;
+    }
+
+    .icon-ui-love,
+    .icon-ui-love-active {
+        position: relative;
+        top: 4px;
+        left: 6px;
+    }
+
+    .icon-ui-restart {
+        position: relative;
+        top: 4px;
+        left: -5px;
+    }
+
+    @media screen and (min-width: $media-md) {
+        position: absolute;
+        bottom: 0;
+        left: auto;
+        right: 0;
+        z-index: 99;
+        @include background-image(none);
+        background-color: transparentize($color-relief, .2);
+        height: 47px;
+        padding: 0;
+        width: 100%;
+    }
+    
+    @media screen and (min-width: $media-md) {
+        @include border-radius(0 0 $unit-border-radius 0);        
+    }
+}
+
+.b-message {
+    text-align: center;
+
+    a { border-bottom: 1px solid $color-relief; }
+
+    .fn { text-transform: capitalize; }
+    
+    .data { 
+        padding: 0 $unit-v; 
+        text-align: center; 
+    }
+
+    .ui-progress { 
+        margin-top: -$unit-v;
+        padding: 0 0 $unit-v*2 0; 
+    }
+
+    .a-primary { margin: $unit-v auto $unit-h; }
+    
+    p + .a-primary { margin-top: $unit-h; }
+
+    @media screen and (min-width: $media-sm) {
+        padding: 0 $unit-v;
+    }
+    
+}
+
+.b-radio { 
+    @include pie-clearfix;
+    background-color: $color-relief;
+    color: $color-main;
+    overflow: hidden;
+    text-align: left;
+    position: relative;
+    z-index: 99;
+
+    .data { 
+        padding: $unit-h; 
+        line-height: 1.33;
+        height: 4em;
+
+        a { color: $color-main; }
+    }
+
+    .l-col-primary {
+        position: relative;
+        z-index: 9;
+    }
+
+    .l-col-secondary {
+        position: relative;
+        z-index: 99;
+    }
+    
+    .ui-progress {
+        position: absolute;
+        bottom: 0px;
+        padding: $unit-h 0;
+        right: 0px;
+    }
+
+    .b-notice { 
+        background-color: $color-accent-light;
+        @include box-sizing(border-box);
+        margin: 0;
+        padding: 12px 0;
+        font-size: calc-em(13px, $font-size-base);
+        @include transform(translate3d(0,0,0));
+        
+        strong { font-weight: 600; }
+        a { color: $color-main; }
+
+        span { 
+            @include transition(opacity $time-default/4 linear);
+            opacity: 0; 
+
+            &.is-visible { opacity: 1; }
+        }
+
+        .url { font-style: italic; }
+    }
+
+    .b-artwork { height: 200px; }
+
+    @media screen and (min-width: $media-sm) {
+        @include border-radius($unit-border-radius);
+        margin: 0 $unit-h;
+            
+        .b-notice { @include border-radius($unit-border-radius $unit-border-radius 0 0); }
+    }
+
+    @media screen and (min-width: $media-md) {
+        height: 200px;
+
+        //don't worry, it uses conditional content
+        #data-artwork { display: block; }
+
+        .l-col-secondary { 
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px; 
+            height: 200px;
+        }
+ 
+        .l-col-primary { margin-right: 200px; }
+
+        .ui-progress {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+        .b-notice { 
+            padding-top: 0;
+            @include border-radius(0 0 0 $unit-border-radius);
+            margin: 63px 0 0 0; 
+            height: 47px;
+
+            span { 
+                @include transition(opacity $time-default/4 linear);
+                opacity: 0; 
+                // position: relative;
+                // top: 10px;
+
+                &.is-visible { opacity: 1; }
+            }
+        }
+    }
+
+    @media screen and (min-width: $media-lg) {
+        margin: 0 $unit-v;
+
+        .icon-rock { margin: 5px 0 -15px; }
+    }
+}
+
+.b-notice {
+    $font-local: 16px;
+
+    padding: $unit-h/2 $unit-h $unit-h;
+    text-align: center;
+    font-size: calc-em($font-local, $font-size-base);  
+    font-weight: 400;
+    background-color: $color-relief;
+    color: $color-main;
+    
+    .action { 
+        color: rgba(50,50,50,.8);
+        background-color: $color-accent-light;
+        padding: $unit-h/1.5;
+        font-size: calc-em(14px, $font-local);
+        display: block;
+
+        span { 
+            font-weight: 900;
+            text-transform: uppercase; 
+            -webkit-font-smoothing: antialiased;
+        }
+    }
+
+    .action-primary { 
+        color: $color-relief;
+        background-color: $color-special; 
+    }
+
+    @media screen and (min-width: $media-sm) {
+        @include border-radius($unit-border-radius);
+    }
+
+    @media screen and (min-width: $media-lg) {
+        .action { display: inline-block; }
+    }
+}
+
+.items {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+    .items-inline {
+        @extend .items;
+
+        li {
+            display: inline-block;
+            vertical-align: top;
+
+            & + li { margin-left: $unit-h; }
+        }
+    }
+
+        .items-inline-controls {
+            @extend .items-inline;
+            overflow: hidden;
+            width: 150px;
+            margin: $unit-h/2 auto 0;
+
+            a { 
+                padding: $unit-h/2; 
+
+                &:active { color: $color-special; }
+            }
+
+            li {
+                padding-top: $unit-h/2;
+
+                & + li {
+                    margin-left: 0;
+                    padding-left: $unit-h;
+                }
+            }
+
+            @media screen and (min-width: $media-md) {
+                margin: 0 auto;
+
+                a { padding-top: 8px; }
+            }
+        }
+
+        .items-inline-condensed {
+            @extend .items;
+            
+            li + li { margin-top: 4px; }
+
+            @media screen and (min-width: $media-lg) {
+
+                li {
+                    display: inline-block; 
+
+                    & + li { margin: 0 0 0 $unit-h/2; }
+                }
+            }
+        }
+
+    .items-playlist { 
+
+        @extend .items;
+        position: relative;
+        z-index: 9;
+        margin-top: -120px;
+        top: 0;
+        margin-bottom: 0;
+        padding: 0 $unit-h;
+
+        li {
+            @include transform(translate3d(0,0,0));
+            padding: $unit-h 0; 
+            position: relative; 
+            opacity: 0;
+            @include box-sizing(border-box);
+            @include transition(opacity $time-default linear);
+            
+            & + li { border-top: 1px solid $color-spare; }
+
+            &:first-child { height: 120px; }
+
+            &.is-visible { opacity: 1; }
+
+        }
+
+        .item {
+            width: 80%; 
+            margin: 0;
+        }
+
+        .hdr-item,
+        .meta { 
+            display: block; 
+        }
+
+        .a-rdio { 
+            color: $color-accent-dark;
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            margin-right: -$unit-h;
+        }
+
+        @media screen and (min-width: $media-sm) {
+           li { padding: $unit-h; }
+        }
+
+        @media screen and (min-width: $media-md) {
+            .a-rdio { margin-right: -$unit-h/2; }
+        }
+
+        @media screen and (min-width: $media-lg) {
+            margin-left: $unit-h;
+            margin-right: $unit-h;
+        }
+    }
+
+.action {
+    @include border-radius(5px);
+    padding: $unit-h/3 $unit-h $unit-h/2;
+    text-align: center;
+    line-height: 1;
+}
+
+    .a-primary {
+        @extend .action;
+        background-color: $color-relief;
+        color: $color-main;
+        display: inline-block;
+        position: relative;
+
+        .ui-progress {
+            position: absolute;
+            top: 50%;
+            left: $unit-h;
+        }
+    }
+
+    .a-rdio { color: $color-relief; } 
+
+.colophon { 
+    line-height: 1.5; 
+    display: inline-block;
+    font-size: calc-em(14px, $font-size-base);
+    color: $color-accent-light;
+
+    a { color: $color-relief; }
+}
+
+.icon {
+    span { 
+        position:absolute;
+        left: -$unit-infinite; 
+    }
+}
+
+.icon-error {
+    width: 60px;
+    height: 60px;
+    margin: $unit-h auto 0;
+}
+
+.icon-o {
+    $font-local: 36px;
+
+    display: inline-block;
+    width: calc-em(50px, $font-local);
+    height: calc-em(50px, $font-local);
+    position: relative;
+    top: calc-em(10px, $font-local);
+}
+
+.icon-progress-dark {
+    width: 20px;
+    height: 20px;
+    margin: 0 auto;
+    display: block;
+}
+
+.icon-rock {
+    width: 40px;
+    height: 40px;
+    margin-bottom: -20px;
+    display: inline-block;
+}
+
+.icon-love {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    position: relative;
+    top: 4px;
+    left: -1px;
+}
+
+.is-special,
+.is-active { color: $color-special; }
+
+.is-primary { background-color: $color-special; }
+
+a.icon-ui-love-active { 
+    color: $color-special;
+    cursor: default; 
+}
+
+#radio,
+#js-notice,
+#data-playlist,
+#data-artwork,
+.no-js #a-auth { display: none; }
+
+@media screen and (min-width: $media-md) {
+    body:after {
+        content: 'md';
+        display: none;
+    }
+}

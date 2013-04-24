@@ -1,0 +1,45 @@
+.no-flexboxlegacy {
+	.l-container {
+    display: block;
+    margin: $unit-v auto 0;
+	}
+
+	.l-inner {
+		display: block;
+		width: 80%;
+		margin: 0 auto;
+	}
+
+	.items-playlist {
+	    li {
+	        display: block;
+	        @include pie-clearfix;
+	    }
+
+	    .item {
+	        display: block;
+	        float: left;
+	    }
+
+	    .action {
+	        display: inline-block;
+	        float: right;
+	    }
+	}
+}
+
+.no-rgba {
+	.b-notice {
+        background-color: $color-relief-hex;
+        
+        .action { 
+            color: $color-main-hex;
+            background-color: $color-accent-light-hex;
+        }
+
+        .action-primary { 
+            color: $color-relief-hex;
+            background-color: $color-special-hex; 
+        }
+    }
+}

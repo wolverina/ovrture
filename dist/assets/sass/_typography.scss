@@ -1,0 +1,43 @@
+.hdr { text-rendering: optimizeLegibility; }
+
+	.hdr-headline { 
+		@extend .hdr;
+		font-weight: 900;
+		font-size: calc-em(36px, $font-size-base);
+		text-transform: uppercase;
+	}
+
+	.hdr-title {
+		@extend .hdr;
+		font-weight: 400;
+		font-size: calc-em(24px, $font-size-base);
+		line-height: 1.3;
+	}
+
+	.hdr-item {
+		font-size: calc-em(20px, $font-size-base);
+		line-height: 1.4;
+		display: inline-block;
+		font-weight: 100;
+	}
+
+.meta {
+	$font-local: 16px;
+	font-size: calc-em($font-local, $font-size-base);
+	line-height: 1.4;
+	font-weight: 400;
+	margin-top: calc-em(8px, $font-size-base);
+	
+	.ss-icon {
+		position: relative;
+		top: 2px;
+		margin-right: calc-em(4px, $font-local);
+	}
+}
+
+	.meta-alt {
+		@extend .meta;
+		margin-top: calc-em(12px, $font-size-base);
+		font-weight: 100;
+		font-style: italic;
+	}

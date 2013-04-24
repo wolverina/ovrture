@@ -1,0 +1,31 @@
+$unit-h: 20px;
+$unit-v: $unit-h*2;
+$unit-border-radius: 6px;
+$unit-infinite: 999em;
+$unit-max-width: 800px;
+
+$color-main: rgba(34,38,40,1);
+$color-relief: rgba(233,233,233,1);
+$color-accent-dark: rgba(143, 141, 136, 0.8);
+$color-accent-light: rgba(193, 201, 196, 0.8);
+$color-special: rgba(235,82,56, 0.8);
+$color-spare: rgba(0,0,0,.2);
+
+$color-main-hex: rgb(34,38,40);
+$color-relief-hex: rgb(233,233,233);
+$color-accent-dark-hex: rgb(143, 141, 136);
+$color-accent-light-hex: rgb(193, 201, 196);
+$color-special-hex: rgb(235,82,56);
+$color-spare-hex: rgb(0,0,0);
+
+$font-size-base: 24px;
+
+$media-sm: 32em;
+$media-md: 40em;
+$media-lg: 48em;
+
+$time-default: 1000ms;
+
+@function calc-em($target-px, $context) {
+  @return ($target-px / $context) * 1em;
+}
