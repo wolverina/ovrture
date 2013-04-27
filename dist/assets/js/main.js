@@ -14,7 +14,7 @@ var O = {
         },
 
         'playlist': {
-            'params': [0,14],
+            'params': [0,9],
             'id': null,
             'current': null,
             'userPlaylists': [],
@@ -23,12 +23,27 @@ var O = {
 
         'lastfm': {},
 
+        'user': {},
+
         'responses': {
-            'init': '<a href="#" id="control-init" class="a-primary"><span>Let the music play</span></a>',
-            'error': '<p class="data">Something went wrong.</p> <a href="#" id="js-retry" class="a-primary">Retry</a>',
-            'errorNull': 'It doesn\'t look like you have any recommendations at this time.',
-            'errorAuth': '<p class="data">An authentication error has occurred.</p> <a href="#" id="js-reauth" class="a-primary">Retry</a>',
-            'errorTrack': '<span>This item could not be added at this time.</span>'
+            'error': {
+                'general': '<p class="data">There was a problem communicating with either last.fm or Rdio.</p> <a href="#" id="js-retry" class="a-primary">Retry</a>',
+                'null': 'Last.fm didn\'t provide us with any recommendations. We suggest you scrobble some music, and try again later.',
+                'auth': '<p class="data">A problem authenticating with last.fm has occurred.</p> <a href="#" id="js-reauth" class="a-primary">Retry</a>',
+                'love': '<span>This item could not be added at this time.</span>'
+            },
+
+            'status': {
+                'lastfm': 'Working 9 to 5...',
+                'lastfmWeekend': 'Working for the weekend...',
+                'lastfmArtists': 'Turn, turn, turn...',
+                'rdioArtists': 'Let\'s Dance!',
+                'isAnonymous': '<span>It looks like you\'re not logged into Rdio. Until you do, you\'ll only hear samples. <a href="#" id="js-dismiss" class="icon icon-ui-close"><span>Dismiss</span></a></span>',
+                'isNotSubscriber': '<span>It looks like you\'re not an Rdio subscriber. There may be limitations as to what tracks you hear. <a href="#" id="js-dismiss" class="icon icon-ui-close"><span>Dismiss</span></a></span>',
+                'isFree': '<span>Based on your Rdio subscription, some songs might not be available in your region.</span>'
+            },
+
+            'init': '<a href="#" id="control-init" class="a-primary"><span>Let the music play</span></a>'
         }
     },
 
@@ -52,6 +67,7 @@ var O = {
             top: 'auto',
             left: 'auto'
         },
+
         'uiProgressDark': {
             lines: 17,
             length: 0,
@@ -70,7 +86,6 @@ var O = {
             top: 'auto',
             left: 'auto'
         }
-
     },
 
     init: function(){
@@ -78,7 +93,7 @@ var O = {
 
         $radio = $('#radio');
         $restart = $('#control-restart');
-        $status = $('#data-message'),
+        $status = $('#data-message');
         $data = $status.find('.data');
         $notice = $('#js-notice');
         $controls = $('#items-controls');
@@ -87,8 +102,10 @@ var O = {
         $prev = $('#control-prev');
         $restart = $('#control-restart');
         $init = $('#control-init');
+        $message = $('#js-rdio-status');
         breakpoint = 640;
 
+        //conditional album artwork
         if (window.getComputedStyle) {
             size = window.getComputedStyle(document.body, ':after').getPropertyValue('content');
 
@@ -97,11 +114,20 @@ var O = {
             } 
         }
 
+        //get user region
+        O.userInfo();
 
+        //lastfm auth:
         //dev
         // lastfm = new LastFM({
         //     apiKey    : 'aa407ffa24d827b3a28720666dd9143b',
         //     apiSecret : '0e9159247d87ec81b72ad85b9b606f23'
+        // });
+
+        //staging
+        // lastfm = new LastFM({
+        //     apiKey    : '448bb2863230012b477f02a389d6e6bb',
+        //     apiSecret : 'eed0aa89b126ed3ddda011a4d99b6b13'
         // });
 
         //production
@@ -116,14 +142,15 @@ var O = {
             O.data.lastfm = JSON.parse(localStorage['Overture.lastfm.session']);
             
             var name = O.data.lastfm.session.name,
-                s = '<div class="b-notice"><p>Hey <span class="fn">'+name+'</span>, it looks like you\'ve been here before. Would you like to continue where you left off?</p><ul class="items-inline-condensed"><li><a href="#" id="a-continue" class="action action-primary"><span>continue</span> where I left off</a></li><li><a href="#" class="action"><span>start</span> from the beginning</a></li><li><a href="#" id="a-new" class="action"><span>sign in</span> as a different last.fm user</a></li></ul></div>',
+                s = '<div class="b-notice"><p>Hey <span class="fn">'+name+'</span>, it looks like you\'ve used Ovrture before. Would you like to...</p><ul class="items-inline-condensed"><li><a href="#" id="a-continue" class="action action-primary"><span>continue</span> where you left off</a></li><li><a href="#" class="action"><span>start</span> from the beginning</a></li><li><a href="#" id="a-new" class="action"><span>sign in</span> as a different last.fm user</a></li></ul></div>',
                 arr = localStorage['Overture.params'].split(','); 
             
             for (var i=0; i <arr.length; i++) {
                 arr[i] = parseInt(arr[i], 10);
             }
 
-            $status.append(s)
+            $status
+                .append(s)
                 .find('#a-auth')
                 .remove()
                 .end()
@@ -209,9 +236,9 @@ var O = {
             $('#a-auth').hide();
             
             if (today.getDay() == 6 || today.getDay() == 0) {
-                $data.html('Working for the weekend...');
+                $data.html(O.data.responses.status.lastfmWeekend);
             } else {
-                $data.html('Running up that hill...');
+                $data.html(O.data.responses.status.lastfm);
             }
             
             $status.append().spin(O.opts.uiProgressLight);
@@ -226,9 +253,9 @@ var O = {
                     var artists = data.recommendations.artist;
                     
                     if (typeof artists !== 'undefined') {
-                        $data.html('Message in a bottle!');
+                        $data.html(O.data.responses.status.lastfmArtists);
                     } else {
-                        $data.html(O.data.responses.errorNull);
+                        $data.html(O.data.responses.error.null);
                     }
                     
                     for (var i = 0, len = artists.length; i < len; i++) {
@@ -293,7 +320,9 @@ var O = {
                 O.rdioEventUnbind($controls);
 
                 for (var i = 0, len = songs.length; i < len; i++) {
-                    R.player.queue.add(songs[i].rdio);
+                    if (songs[i].track !== null && songs[i].regions.indexOf(O.data.user.region)){
+                        R.player.queue.add(songs[i].track);
+                    }
 
                     if (parseInt(i+1) === O.data.songs.obj.length) {
                         R.player.queue.play(1);
@@ -305,16 +334,37 @@ var O = {
     },
 
     updateParams: function(){
-        O.data.playlist.params[0] = parseInt(O.data.playlist.params[0]+15);
-        O.data.playlist.params[1] = parseInt(O.data.playlist.params[1]+15);
+        O.data.playlist.params[0] = parseInt(O.data.playlist.params[0]+10);
+        O.data.playlist.params[1] = parseInt(O.data.playlist.params[1]+10);
 
         localStorage.setItem('Overture.params', [O.data.playlist.params[0], O.data.playlist.params[1]]);
     },
 
     getTracks: function(dataset, start, stop, init, callback){
 
-        var iterations = [],
-            len = 15;
+        var jCount = [],
+            len = 10;
+
+        if (O.data.user.isSubscriber == 'false') {
+            var s =  O.data.responses.status.isNotSubscriber;
+        } if (O.data.user.isSubscriber == 'anon') {
+            var s =  O.data.responses.status.isAnonymous;
+        }
+
+        if (s) {
+            $message
+                .show()
+                .html(s)
+                .find('span')
+                .addClass('is-visible')
+                .end()
+                .on('click', function(){
+                    $(this).slideUp({
+                        duration: O.opts.duration/4, 
+                        easing: 'easeInOutCubic'                         
+                    });
+                });
+        }
         
         //if the loop exceeds the number of remaining artists
         if (stop >= O.data.artists.obj.length) {
@@ -327,79 +377,100 @@ var O = {
         O.data.songs.obj.length = 0;
 
         for (var i = start; i <= stop; i++) {
-            var k = 1;
-            //get song titles
-            $.ajax({
-                url: 'http://developer.echonest.com/api/v4/song/search?',
-                dataType: 'jsonp',
-                ajaxI: i,
-                timeout: 5000,
-                data: {
-                    format: 'jsonp',
-                    results: len,
-                    api_key: 'BMFA0JN7IZ2RSW1TA',
-                    bucket: 'id:rdio-us-streaming',
-                    artist: dataset[i].artist,
-                    start: 1,
-                    sort: 'song_hotttnesss-desc',
-                    callback: ''    
+            var j = 0;
+            if (init == true) {
+                $data.text(O.data.responses.status.rdioArtists);
+            }
+
+            R.request({
+                method: 'search',
+                content: {
+                    query: dataset[i].artist,
+                    types: 'Artist',
+                    count: 1                    
                 },
 
-                success: function(data){
-                 
-                    i = this.ajaxI; 
-                    iterations.push(i);
-                    
-                    if (init == true) {
-                        
-                        $data.text('Mambo Number '+ k);
-                
+                success: function(response) {
+                    //console.log(response.result.results[0]);
+                    //get artist
+                    if (response.result.results[0]) {
+                        O.data.songs.obj.push({
+                            'artist': response.result.results[0].name,
+                            'key': response.result.results[0].key,
+                            'track': null,
+                            'regions': null
+                        });
                     }
 
-                    k++;
-
-                   //search for the song with the rdio id and add it to the songs
-                    for (var j = 0; j <= len; j++) {
-
-                        if (data.response.songs[j] && data.response.songs[j].foreign_ids.length) {
-                            O.data.songs.obj.push({
-                                'artist': data.response.songs[j].artist_name,
-                                'rdio': data.response.songs[j].foreign_ids[0].foreign_id.split(':').slice(-1)[0],
-                                'title': data.response.songs[j].title,
-                                'echonest': data.response.songs[j].id,
-                                'influences': O.data.artists.obj[i].influences
-                            });
-
-                            break;
-                        }
-                    }
+                    jCount.push(j);
+                    j++;
                     
                     //when loop has looped
+                    var cond1 = jCount.length;
+
                     if (O.data.playlist.last == true) {
-                        var cond1 = iterations.length,
-                            cond2 = parseInt(stop-start+1);
+                        var cond2 = parseInt(stop-start+1);
                     } else {
-                        var cond1 = iterations.length,
-                            cond2 = parseInt(len);
+                        var cond2 = parseInt(len);
                     }
 
-                    if (cond1 === cond2) {
+                    if (cond1 === cond2) { 
+                        var mCount = [],
+                            m = 0;
 
-                        if (init == true){
-                            $data.html(O.data.responses.init);
-                            $status.spin(false);
-                            O.rdio();
-                        }
+                        for (var k = 0; k < O.data.songs.obj.length; k++) {
 
-                        if (O.data.playlist.last !== true) {
-                            O.updateParams();
-                        }
+                            R.request({
+                                method: 'getTracksForArtist',
+                                content: {
+                                    artist: O.data.songs.obj[k].key,
+                                    count: 1,
+                                    extras: 'streamRegions'                  
+                                },
 
-                        if(callback){
-                            callback();
-                        }
+                                success: function(response) {
+                                    if (init == true) {
+                                        $data.text('Mambo Number '+ m);
+                                    }
+
+                                    if (response.result.length) {
+                                        O.data.songs.obj[m].track = response.result[0].key;
+                                        O.data.songs.obj[m].regions = response.result[0].streamRegions;
+                                    }
+
+                                    mCount.push(m);
+                                    m++;
+
+                                    //when dis loop has completed
+                                    if (k === m) {
+     
+                                        if (init == true){
+                                            $data.html(O.data.responses.init);
+                                            $status.spin(false);
+                                            O.rdio();
+                                        }
+
+                                        if (O.data.playlist.last !== true) {
+                                            O.updateParams();
+                                        }
+
+                                        if(callback){
+                                            callback();
+                                        }
+                                    }
+                                },
+
+                                error: function(error){
+                                    //console.log(error);
+                                    O.errors.general();
+                                    
+                                    O.rdioEventBind($controls);
+                                }                
+                            });
+                        }    
                     }
                 },
+
                 error: function(error){
                     //console.log(error);
                     O.errors.general();
@@ -407,7 +478,7 @@ var O = {
                     O.rdioEventBind($controls);
                 }                
             });
-        }  
+        }
     },//end getTracks
 
     rdio: function(){
@@ -431,13 +502,18 @@ var O = {
         $tracks = $('#data-tracks');
 
         R.ready(function() {
-            var songs = O.data.songs.obj;   
+
+            var songs = O.data.songs.obj;
 
             for (var i = 0, len = songs.length; i < len; i++) {
-                R.player.queue.add(songs[i].rdio);
+
+                if(songs[i].track !== null && songs[i].regions.indexOf(O.data.user.region)){
+                    R.player.queue.add(songs[i].track);
+                }
             }
 
             $init.show().on('click',function() {
+                
 
                 $playlist.show();
 
@@ -463,7 +539,7 @@ var O = {
                 });
 
                 if (typeof R.player.queue.at(0) == 'undefined') {   
-                    O.errors.general();
+                   O.errors.general();
                 } else {
                     var current = R.player.queue.at(0).attributes.key;
 
@@ -471,7 +547,6 @@ var O = {
                     R.player.queue.remove(0);
                     
                     $(this).hide();
-
                 }
 
                 $(document).on('keydown', function(e){
@@ -497,19 +572,24 @@ var O = {
             });
         
             R.on('rebootEnd', function(){
-                
                 O.restartPlayer(function(){
                     $next.show();
                     $restart.hide();
 
-                    O.loveAction.init($controls, '.a-rdio', true);
+                    O.loveAction.init($controls, $('.a-rdio'), true);
 
-                }); 
-                      
+                    if ($message.is(':visible')) {
+                        $message.slideUp({
+                            duration: O.opts.duration/4, 
+                            easing: 'easeInOutCubic'                         
+                        });
+                    }
+
+
+                });    
             });
 
             R.player.on('change:playingTrack', function(track) {
-
                 if (track !== null) {
 
                     var id = track.get('key'),
@@ -521,6 +601,12 @@ var O = {
                         offset = $playlist.find('li:first-child').height();
 
                     O.updateCurrentTrack();
+                    
+                    if ($controls.find('.a-rdio').hasClass('icon-ui-love-active')) {
+                        $controls.find('.a-rdio')
+                            .removeClass('icon-ui-love-active')
+                            .addClass('icon-ui-love');                        
+                    }
 
                     if (track.get('canSample') == true && track.get('canStream') == true) {
                         var artists = O.data.artists.obj;
@@ -586,15 +672,17 @@ var O = {
                     O.updateCurrentTrack();
                 }
                 
-                if ((R.player.queue.length() === 5 && O.data.playlist.last !== true) || track ==  null) {
+                if ((R.player.queue.length() === 5 && O.data.playlist.last !== true) || track == null) {
                     O.rdioEventUnbind($controls);
 
-                    //get next params-worth of tracks from echonest
+                    //get next params-worth of tracks from rdio
                     O.getTracks(O.data.artists.obj, O.data.playlist.params[0], O.data.playlist.params[1], false, function(){
                             var songs = O.data.songs.obj;
 
                             for (var i = 0, len = songs.length; i < len; i++) {
-                                R.player.queue.add(songs[i].rdio);
+                                if (songs[i].track !== null && songs[i].regions.indexOf(O.data.user.region)){
+                                    R.player.queue.add(songs[i].track);                                    
+                                }
                             }
                         
                         O.rdioEventBind($controls);
@@ -604,7 +692,7 @@ var O = {
                 if (O.data.playlist.last == true && R.player.queue.length() == 0) {
                     //console.log('last unique song');
 
-                    O.data.playlist.params = [0,14];
+                    O.data.playlist.params = [0,9];
 
                     $(document).off('.controls.next');
 
@@ -732,7 +820,7 @@ var O = {
 
             if (container == $playlist) {
                 O.loveAction.track = action.parents('li').data('rdio_id');
-                console.log(O.loveAction.track);
+
             } else if (container == $controls) {
                 O.loveAction.track = O.data.playlist.current.key;
             }
@@ -782,16 +870,16 @@ var O = {
                             .toggleClass('icon-ui-love-alt icon-ui-love-active');
                     }
 
-                    if (reboot == false) {
+                    //if (reboot == false) {
                         action
                             .removeClass('icon-ui-love icon-ui-love-alt')
                             .addClass('icon-ui-love-active');                        
-                    }
+                    //}
 
                     O.loveAction.response($notice, s);
                 },
                 error: function(response, container, action) {
-                    var s = O.data.responses.errorTrack;      
+                    var s = O.data.responses.error.love;      
 
                     //console.log('add', response, container, action);
                     O.loveAction.response($notice, s);
@@ -824,16 +912,15 @@ var O = {
                             .toggleClass('icon-ui-love-alt icon-ui-love-active');
                     }
                     
-                    if (reboot == false) {
-                        action
-                            .removeClass('icon-ui-love icon-ui-love-alt')
-                            .addClass('icon-ui-love-active');   
-                    }
+                    action
+                        .removeClass('icon-ui-love icon-ui-love-alt')
+                        .addClass('icon-ui-love-active');   
+                    
 
                     O.loveAction.response($notice, s);
                 },
                 error: function(response, action, container) {
-                    var s = O.data.responses.errorTrack;      
+                    var s = O.data.responses.error.love;      
 
                     //console.log('create', response, action, container);
                     O.loveAction.response($notice, s);
@@ -842,17 +929,21 @@ var O = {
         },
 
         response: function(action, string){
-            var delay = O.opts.duration*3,
-                viewport = window.innerWidth,
-                duration = O.opts.duration/4;
+            var viewport = window.innerWidth,
+                duration = O.opts.duration/4,
+                delay = O.opts.duration*3;
             
             action
                 .html(string)
                 .find('span')
                 .addClass('is-visible');
-                setTimeout(function() {
-                    action.find('span').removeClass('is-visible');
-                }, delay);
+
+                if (delay) {
+                    setTimeout(function() {
+                        action.find('span').removeClass('is-visible');
+                    }, delay);                    
+                }
+
 
             if (viewport < breakpoint) {
                 action.prependTo('.l-col-primary').css({ 'margin-top': 0 });
@@ -861,12 +952,17 @@ var O = {
                         duration: duration, 
                         easing: 'easeInOutCubic',
                         queue: false
-                    })
-                    .delay(delay)
-                    .slideUp({
-                        duration: duration, 
-                        easing: 'easeInOutCubic'                         
                     });
+
+                if (delay){
+                    action
+                        .delay(delay)
+                        .slideUp({
+                            duration: duration, 
+                            easing: 'easeInOutCubic'                         
+                        });
+                }
+
                 
             } else {
                 action.appendTo('.l-col-primary');
@@ -878,26 +974,54 @@ var O = {
                         duration: duration, 
                         easing: 'easeOutCubic',
                         queue: false
-                    })
-                    .delay(delay)
-                    .animate({
-                        'margin-top': '64px'
-                    },{
-                        duration: duration, 
-                        easing: 'easeInCubic',
-                        complete: function(){
-                            action.hide();
-                        }
                     });
-                }
+
+                    if (delay) {
+                        action
+                            .delay(delay)
+                            .animate({
+                                'margin-top': '64px'
+                            },{
+                                duration: duration, 
+                                easing: 'easeInCubic',
+                                complete: function(){
+                                    action.hide();
+                                }
+                            });
+                    }
             }
+        }
     }, 
+
+    userInfo: function(){
+        R.ready(function(){
+            R.request({
+                method: 'currentUser',
+                content: {
+                    extras: 'streamRegion, isSubscriber'
+                },
+
+                success: function(response) {
+                    O.data.user.region = response.result.streamRegion;
+                    if (response.result.isSubscriber == false) {
+                        O.data.user.isSubscriber = 'false';
+                    }
+                },
+
+                error: function(response) {
+                    if (response.code == 401) {
+                        O.data.user.isSubscriber = 'anon';
+                    }
+                }
+            });
+        });
+    },
 
     'errors': {
         auth: function(action){
             $status
                 .spin(false)
-                .html(O.data.responses.errorAuth)
+                .html(O.data.responses.error.auth)
                 .append('<div class="icon-error"></div>')
                 .on('click', action, function(e){
 
@@ -911,7 +1035,7 @@ var O = {
         general: function(action){
             $status
                 .spin(false)
-                .html(O.data.responses.error)
+                .html(O.data.responses.error.general)
                 .append('<div class="icon-error"></div>')
                 .on('click', action, function(e){
 
